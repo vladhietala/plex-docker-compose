@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 name: 'utils'
 
@@ -22,7 +22,7 @@ services:
       - PUID=1000
       - PGID=1000
     volumes:
-      - /home/akitaonrails/organizr:/config
+      - ${HOME_DIR}/organizr:/config
     ports:
       - '80:80'
     cap_add:
@@ -41,7 +41,7 @@ services:
     image: zerotier/zerotier:latest
     restart: unless-stopped
     volumes:
-      - /home/akitaonrails/zerotier:/var/lib/zerotier-one
+      - ${HOME_DIR}/zerotier:/var/lib/zerotier-one
     devices:
       - /dev/net/tun:/dev/net/tun
     cap_add:
@@ -58,6 +58,6 @@ services:
       - PUID=1000
       - PGID=1000
     volumes:
-      - /home/akitaonrails/librespeed:/config
+      - ${HOME_DIR}/librespeed:/config
     ports:
-      - '9091:80'
+      - "9091:80"
