@@ -31,12 +31,12 @@ services:
     volumes:
       - ${HOME_DIR}/dnsmasq.d:/etc/dnsmasq.d
       - ${HOME_DIR}/pihole:/etc/pihole
-    network_mode: host
     ports:
       - "53:53/tcp"
       - "53:53/udp"
       - "67:67/udp"
       - "81:80/tcp"
+      - "8053:8053/tcp"
     cap_add:
       - NET_RAW
 
