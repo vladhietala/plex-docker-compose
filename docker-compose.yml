@@ -176,6 +176,7 @@ services:
       - ${HOME_DIR}/nzbget/config:/config
     ports:
       - "6789:6789"
+      - "8081:8080"
 
   radarr:
     image: ghcr.io/linuxserver/radarr:latest
