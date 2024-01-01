@@ -1,0 +1,238 @@
+version: "3"
+
+name: "plex-server"
+
+services:
+  cloudflared:
+    image: visibilityspots/cloudflared:latest
+    restart: unless-stopped
+    environment:
+      - UPSTREAM1=https://1.1.1.1/dns-query
+      - UPSTREAM2=https://1.0.0.1/dns-query
+      - PORT=5054
+      - ADDRESS=0.0.0.0
+      - METRICS=127.0.0.1:8088
+    network_mode: bridge
+    ports:
+      - "5054:5054/tcp"
+      - "5054:5054/udp"
+
+  pihole:
+    image: pihole/pihole:latest
+    restart: unless-stopped
+    depends_on:
+      - cloudflared
+    environment:
+      - DNSMASQ_USER=pihole
+      - WEBPASSWORD=${PIHOLE_WEBPASSWORD}
+      - TZ=America/Sao_Paulo
+      - PIHOLE_DNS_=127.0.0.1#5054
+      - WEB_PORT=8053
+    volumes:
+      - ${HOME_DIR}/dnsmasq.d:/etc/dnsmasq.d
+      - ${HOME_DIR}/pihole:/etc/pihole
+    network_mode: host
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "67:67/udp"
+      - "81:80/tcp"
+    cap_add:
+      - NET_RAW
+
+  organizr:
+    image: organizr/organizr:latest
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - ${HOME_DIR}/organizr:/config
+    ports:
+      - "80:80"
+    cap_add:
+      - NET_BIND_SERVICE
+
+  watchtower:
+    image: containrrr/watchtower:latest
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    cap_add:
+      - NET_RAW
+      - SETUID
+
+  zerotier:
+    image: zerotier/zerotier:latest
+    restart: unless-stopped
+    volumes:
+      - ${HOME_DIR}/zerotier:/var/lib/zerotier-one
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+      - SYS_ADMIN
+
+  librespeed:
+    image: lscr.io/linuxserver/librespeed:latest
+    restart: unless-stopped
+    environment:
+      - TZ=America/Sao_Paulo
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - ${HOME_DIR}/librespeed:/config
+    ports:
+      - "9091:80"
+
+  qbittorrent:
+    image: linuxserver/qbittorrent:latest
+    restart: unless-stopped
+    environment:
+      - TZ=America/Sao_Paulo
+      - WEBUI_PORT=8080
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - ${HOME_DIR}/qbittorrent/config:/config
+      - ${MEDIA_DIR}/Downloads/torrents:/downloads
+    ports:
+      - "8080:8080"
+      - "62609:62609"
+
+  jackett:
+    image: ghcr.io/linuxserver/jackett:latest
+    restart: unless-stopped
+    environment:
+      - TZ=America/Sao_Paulo
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - ${HOME_DIR}/jackett/downloads:/downloads
+      - ${HOME_DIR}/jackett/config:/config
+    ports:
+      - "9117:9117"
+
+  bazarr:
+    image: ghcr.io/linuxserver/bazarr:latest
+    restart: unless-stopped
+    environment:
+      - TZ=America/Sao_Paulo
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - ${MEDIA_DIR}/Videos/radarr:/movies
+      - ${MEDIA_DIR}/Videos/sonarr:/tv
+      - ${HOME_DIR}/bazarr/appdata/config:/config
+    ports:
+      - "6767:6767"
+
+  overseerr:
+    image: sctx/overseerr
+    restart: unless-stopped
+    depends_on:
+      - qbittorrent
+    environment:
+      - TZ=America/Sao_Paulo
+      - PORT=5055
+    volumes:
+      - ${HOME_DIR}/overseerr/config:/app/config
+    ports:
+      - "5055:5055"
+
+  prowlarr:
+    image: ghcr.io/hotio/prowlarr:latest
+    restart: unless-stopped
+    depends_on:
+      - flaresolverr
+    environment:
+      - TZ=America/Sao_Paulo
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - ${HOME_DIR}/prowlarr/config:/config
+    ports:
+      - "9696:9696"
+
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    restart: unless-stopped
+    volumes:
+      - ${HOME_DIR}/flaresolverr/config:/config
+    ports:
+      - "8191:8191"
+
+  sabnzbd:
+    image: lscr.io/linuxserver/sabnzbd:latest
+    restart: unless-stopped
+    environment:
+      - TZ=America/Sao_Paulo
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - ${MEDIA_DIR}/Downloads/nzbget:/downloads
+      - ${MEDIA_DIR}/Downloads/nzbget/incomplete:/incomplete-downloads
+      - ${HOME_DIR}/nzbget/config:/config
+    ports:
+      - "6789:6789"
+
+  radarr:
+    image: ghcr.io/linuxserver/radarr:latest
+    restart: unless-stopped
+    depends_on:
+      - qbittorrent
+    environment:
+      - TZ=America/Sao_Paulo
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - ${HOME_DIR}/radarr/appdata/config:/config
+      - ${MEDIA_DIR}/Downloads/torrents:/downloads
+      - ${MEDIA_DIR}/Videos/radarr/movies:/movies
+      - ${MEDIA_DIR}/Videos/radarr/anime:/anime
+    ports:
+      - "7878:7878"
+
+  sonarr:
+    image: ghcr.io/linuxserver/sonarr:latest
+    restart: unless-stopped
+    depends_on:
+      - qbittorrent
+    environment:
+      - TZ=America/Sao_Paulo
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - ${HOME_DIR}/sonarr/appdata/config:/config
+      - ${MEDIA_DIR}/Videos/sonarr:/tv
+      - ${MEDIA_DIR}/Downloads/torrents:/downloads
+    ports:
+      - "8989:8989"
+
+  plex:
+    image: plexinc/pms-docker:latest
+    shm_size: "2gb"
+    restart: unless-stopped
+    environment:
+      - TZ=America/Sao_Paulo
+      - PUID=1000
+      - PGID=1000
+      - VA_DRIVER=IHD
+    volumes:
+      - ${HOME_DIR}/plex/config:/config
+      - ${HOME_DIR}/plex/data:/data
+      - ${HOME_DIR}/plex/transcode:/transcode
+      - ${MEDIA_DIR}/Videos:/media
+    devices:
+      - /dev/dri:/dev/dri
+      - /dev/bus/usb:/dev/bus/usb
+    ports:
+      - 32400:32400/tcp
+      - 8324:8324/tcp
+      - 32469:32469/tcp
+      - 1900:1900/udp
+      - 32410:32410/udp
+      - 32412:32412/udp
+      - 32413:32413/udp
+      - 32414:32414/udp
