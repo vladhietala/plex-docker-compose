@@ -13,7 +13,7 @@ services:
       - PGID=1000
     volumes:
       - ${HOME_DIR}/qbittorrent/config:/config
-      - /mnt/terachad/Downloads/torrents:/downloads
+      - ${MEDIA_DIR}/Downloads/torrents:/downloads
     ports:
       - "8080:8080"
       - "62609:62609"
@@ -39,8 +39,8 @@ services:
       - PUID=1000
       - PGID=1000
     volumes:
-      - /mnt/terachad/Videos/radarr:/movies
-      - /mnt/terachad/Videos/sonarr:/tv
+      - ${MEDIA_DIR}/Videos/radarr:/movies
+      - ${MEDIA_DIR}/Videos/sonarr:/tv
       - ${HOME_DIR}/bazarr/appdata/config:/config
     ports:
       - "6767:6767"
@@ -88,8 +88,8 @@ services:
       - PUID=1000
       - PGID=1000
     volumes:
-      - /mnt/terachad/Downloads/nzbget:/downloads
-      - /mnt/terachad/Downloads/nzbget/incomplete:/incomplete-downloads
+      - ${MEDIA_DIR}/Downloads/nzbget:/downloads
+      - ${MEDIA_DIR}/Downloads/nzbget/incomplete:/incomplete-downloads
       - ${HOME_DIR}/nzbget/config:/config
     ports:
       - "6789:6789"
@@ -105,9 +105,9 @@ services:
       - PGID=1000
     volumes:
       - ${HOME_DIR}/radarr/appdata/config:/config
-      - /mnt/terachad/Downloads/torrents:/downloads
-      - /mnt/terachad/Videos/radarr/movies:/movies
-      - /mnt/terachad/Videos/radarr/anime:/anime
+      - ${MEDIA_DIR}/Downloads/torrents:/downloads
+      - ${MEDIA_DIR}/Videos/radarr/movies:/movies
+      - ${MEDIA_DIR}/Videos/radarr/anime:/anime
     ports:
       - "7878:7878"
 
@@ -122,8 +122,8 @@ services:
       - PGID=1000
     volumes:
       - ${HOME_DIR}/sonarr/appdata/config:/config
-      - /mnt/terachad/Videos/sonarr:/tv
-      - /mnt/terachad/Downloads/torrents:/downloads
+      - ${MEDIA_DIR}/Videos/sonarr:/tv
+      - ${MEDIA_DIR}/Downloads/torrents:/downloads
     ports:
       - "8989:8989"
 
@@ -140,7 +140,7 @@ services:
       - ${HOME_DIR}/plex/config:/config
       - ${HOME_DIR}/plex/data:/data
       - ${HOME_DIR}/plex/transcode:/transcode
-      - /mnt/terachad/Videos:/media
+      - ${MEDIA_DIR}/Videos:/media
     devices:
       - /dev/dri:/dev/dri
       - /dev/bus/usb:/dev/bus/usb

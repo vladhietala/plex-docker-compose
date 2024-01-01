@@ -30,7 +30,7 @@ This repository contains Docker Compose scripts for setting up a home server. Th
 4. Run the Docker Compose file:
 
    ```bash
-   docker compose -f infra-docker-compose.yml up -d
+   docker compose -f net-docker-compose.yml up -d
    ```
 
 ## Configuration

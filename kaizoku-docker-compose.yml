@@ -19,8 +19,8 @@ services:
       - PGID=1000
       - TZ=America/Sao_Paulo
     volumes:
-      - /mnt/terachad/Manga/Library:/data
-      - /mnt/terachad/Manga/Kaizoku/config:/config
+      - ${MEDIA_DIR}/Manga/Library:/data
+      - ${MEDIA_DIR}/Manga/Kaizoku/config:/config
       - /tmp:/logs
     depends_on:
       kaizoku-db:
@@ -51,6 +51,6 @@ services:
     restart: unless-stopped
     volumes:
       - ${HOME_DIR}/kavita:/kavita/config
-      - /mnt/terachad/Manga/Library:/manga
+      - ${MEDIA_DIR}/Manga/Library:/manga
     ports:
       - "5000:5000"
